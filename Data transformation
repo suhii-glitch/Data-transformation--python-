@@ -1,0 +1,116 @@
+-- Data Transformation (ML Preprocessing) Assignment Solution
+-- Dataset: Employee_productivity_Dataset
+-- PwSkills
+
+-- Q1. Handle Missing Values (Basic Cleaning)
+-- Fill missing values as specified
+-- Answer:
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv("employee_productivity_dataset.csv")
+
+df['Age'].fillna(df['Age'].median(), inplace=True)
+df['Salary'].fillna(df['Salary'].mean(), inplace=True)
+df['Hours_Worked_Per_Week'].fillna(df['Hours_Worked_Per_Week'].median(), inplace=True)
+df['Performance_Score'].fillna(df['Performance_Score'].mean(), inplace=True)
+
+print(df.head())
+
+-- Q2. Label Encoding
+-- Encode Gender and Department
+-- Answer:
+from sklearn.preprocessing import LabelEncoder
+
+le = LabelEncoder()
+
+df['Gender'] = le.fit_transform(df['Gender'])
+df['Department'] = le.fit_transform(df['Department'])
+
+print(df[['Gender', 'Department']].head())
+
+-- Q3. One-Hot Encoding
+-- Encode Work_Mode and Location
+-- Answer:
+df = pd.get_dummies(df, columns=['Work_Mode', 'Location'])
+
+print(df.head())
+print("New Columns:", len(df.columns))
+
+-- Q4. Normalization (Min-Max Scaling)
+-- Apply on Salary and Hours_Worked_Per_Week
+-- Answer:
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+
+df[['Salary', 'Hours_Worked_Per_Week']] = scaler.fit_transform(
+    df[['Salary', 'Hours_Worked_Per_Week']]
+)
+
+print(df[['Salary', 'Hours_Worked_Per_Week']].head())
+
+-- Q5. Standardization (Scaling)
+-- Apply on Age and Projects_Completed
+-- Answer:
+from sklearn.preprocessing import StandardScaler
+
+std_scaler = StandardScaler()
+
+df[['Age', 'Projects_Completed']] = std_scaler.fit_transform(
+    df[['Age', 'Projects_Completed']]
+)
+
+print(df[['Age', 'Projects_Completed']].head())
+
+-- Q6. Compare Scaling Methods (Salary)
+-- Apply MinMaxScaler and StandardScaler
+-- Answer:
+salary_minmax = MinMaxScaler().fit_transform(df[['Salary']])
+salary_standard = StandardScaler().fit_transform(df[['Salary']])
+
+comparison = pd.DataFrame({
+    'MinMax': salary_minmax.flatten(),
+    'Standardized': salary_standard.flatten()
+})
+
+print(comparison.head())
+
+-- Q7. Build Preprocessing Pipeline
+-- Answer:
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+num_cols = ['Age', 'Salary', 'Hours_Worked_Per_Week', 'Projects_Completed']
+cat_cols = ['Gender', 'Department']
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), num_cols),
+        ('cat', 'passthrough', cat_cols)
+    ]
+)
+
+pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor)
+])
+
+-- Q8. Apply Pipeline
+-- Answer:
+transformed_data = pipeline.fit_transform(df)
+
+print("Transformed Data Shape:", transformed_data.shape)
+
+-- Q9. Conceptual Question
+-- Why is scaling important in Python?
+-- Answer:
+-- Scaling ensures all features are on the same range.
+-- It prevents models from being biased toward large-value features.
+-- Improves performance of ML algorithms like KNN, SVM, and regression.
+
+-- Q10. Conceptual Question
+-- Why convert categorical data into numerical form?
+-- Answer:
+-- Machine learning models require numerical input.
+-- Encoding converts categories into numbers without losing information.
+-- Enables models to process and learn from categorical variables.
